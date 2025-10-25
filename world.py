@@ -8,8 +8,9 @@ class GridEntity:
         self.x_coordinate, self.y_coordinate = world_object.generate_random_coordinate()
 
 class MovingEntity(GridEntity):
-    def __init__(self, stamina, speed, hunger, awareness_radius):
+    def __init__(self, hp, stamina, speed, hunger, awareness_radius):
         super().__init__(self, world_object)
+        self.hp = hp
         self.stamina = stamina
         self.speed = speed
         self.hunger = hunger
