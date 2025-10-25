@@ -26,3 +26,5 @@ zombie = pixel_image("Image/zombie-pixel.png", (50, 64), x ,y)
 human = pixel_image("Image/human.png", (50, 50),x, y)
 apartment = pixel_image("Image/apartment.png", (130, 130), 100, 100)
 shop = pixel_image("Image/shop.png", (100, 100), 100, 400)
+
+human_poster = pixel_image("Image/human.png", (200, 200),10, 150)
