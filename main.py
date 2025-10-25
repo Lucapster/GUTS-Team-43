@@ -1,13 +1,13 @@
 import pygame
 from character_customization import character_customization
-from game_object import background, zombie, human, apartment, shop
+from game_object import background, zombie, human, apartment, shop, concrete_background
 
 pygame.init()
 
 window_size = pygame.display.Info()
 screen_width, screen_height = window_size.current_w, window_size.current_h
 
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE) 
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
 
 player_stats = character_customization(screen)
 print("Chosen stats:", player_stats)
@@ -17,11 +17,11 @@ y = 0
 
 running = True
 
-# main loop
+# main loop 
 while running:
 
     screen.fill((0, 0, 0))
-    background.draw()
+    concrete_background.draw()
     apartment.draw()
     shop.draw()
     

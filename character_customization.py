@@ -19,6 +19,9 @@ def character_customization(screen):
             "plus": pygame.Rect(400, y_start, 40, 40),
             "minus": pygame.Rect(460, y_start, 40, 40)
         }
+
+        start_button = pygame.Rect(250, 550, 140, 50)
+
         y_start += 70
 
 
@@ -34,7 +37,14 @@ def character_customization(screen):
                     return stats
                 
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                
+                
                 mx, my = pygame.mouse.get_pos()
+
+                if start_button.collidepoint(mx, my):
+                    customizing = False
+                    return stats
+
                 for stat in stats:
                     if buttons[stat]["plus"].collidepoint(mx, my) and points > 0:
                         stats[stat] += 1
@@ -68,10 +78,12 @@ def character_customization(screen):
         remaining = font.render(f"Points left: {points}", True, (255, 255, 0))
         screen.blit(remaining, (300, y + 20))
 
+        # trying to make the start button
+        pygame.draw.rect(screen, (120, 61, 34), start_button, border_radius=8)
+        start_text = font.render("Start", True, (255, 255, 255))
+        text_rect = start_text.get_rect(center=start_button.center)
+        screen.blit(start_text, text_rect)
 
-        info = font.render("Enter to start", True, (0, 255, 0))
-        screen.blit(info, (100, 500))
-        
         human_poster.draw()
 
         pygame.display.flip()
