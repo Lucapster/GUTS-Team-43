@@ -1,9 +1,13 @@
 import pygame
-from game_obejct import background, zombie, human, apartment, shop
+from character_customization import character_customization
+from game_object import background, zombie, human, apartment, shop
 
 pygame.init()
 
 screen = pygame.display.set_mode((640, 640)) 
+
+player_stats = character_customization(screen)
+print("Chosen stats:", player_stats)
   
 x = 0
 y = 0
