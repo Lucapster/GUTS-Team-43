@@ -8,7 +8,7 @@ def character_customization(screen):
 
 
     #initial setup
-    stats = {"Health": 0, "Speed": 0, "Strength": 0}
+    stats = {"HP": 0, "Stamina" : 0, "Speed": 0, "Awareness_radius": 0}
     points = 10
     customizing = True
 
@@ -42,7 +42,6 @@ def character_customization(screen):
                     elif buttons[stat]["minus"].collidepoint(mx, my) and stats[stat] > 0:
                         stats[stat] -= 1
                         points += 1
-                        
                 
 
         screen.fill((25, 25, 25))
@@ -69,7 +68,8 @@ def character_customization(screen):
         remaining = font.render(f"Points left: {points}", True, (255, 255, 0))
         screen.blit(remaining, (300, y + 20))
 
-        info = font.render("Press 1, 2, 3 to add | Enter to start", True, (0, 255, 0))
+
+        info = font.render("Enter to start", True, (0, 255, 0))
         screen.blit(info, (100, 500))
         
         human_poster.draw()

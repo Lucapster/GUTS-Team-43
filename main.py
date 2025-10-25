@@ -4,7 +4,10 @@ from game_object import background, zombie, human, apartment, shop
 
 pygame.init()
 
-screen = pygame.display.set_mode((640, 640)) 
+window_size = pygame.display.Info()
+screen_width, screen_height = window_size.current_w, window_size.current_h
+
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE) 
 
 player_stats = character_customization(screen)
 print("Chosen stats:", player_stats)
