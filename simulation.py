@@ -51,7 +51,7 @@ def start_simulation():
     #need the human and zombie list here- so values in the while can be gotten here
     while world.human_count() > 0 and world.zombie_count() > 0:
         for infected in world.humans():
-            if infected.is_infected == True
+            if infected.is_infected == True:
                 world.add_zombie(infected) #adds new zombie from human
                 world.deactivate_human(infected) #deactivates human based on id
         #if at same location
@@ -61,25 +61,23 @@ def start_simulation():
                 human_id, zombie_id = [], []
                 for id, location in human_location.items():
                     if location == i:
-                        human_id.append(id)
+                        human_id.append(humans[id])#append object
                 for id, location in zombie_location.items():
                     if location == i:
-                        zombie_id.append(id)
+                        zombie_id.append(zombies[id])#append object
                 seen.append(i)
         action(human_id, zombie_id) #returns lists of id position pairs; the stat values are gonna be changed globally?
 
         #if human at supermarket
-        market_list = []
+        human_id = []
         for i in human_location.values:
              if i not in seen and i in supermarket.position():
-                human_id = []
                 for id, location in human_location.items():
                     if location == i:
-                        human_id.append(id)
-                market_list.append(human_id)
+                        human_id.append(humans[id])
                 seen.append(i)
         #takes values from outer variables in the div
-        market(market_list, day%1)
+        market(human_id, day%1)
 
         #if only humans or zombies
         human_list = []
@@ -99,21 +97,14 @@ def start_simulation():
         day += 0.5
     show_results()
 
-def action (human_id, zombie_id):
-    human_objects = [humans[id] for id in human_id]
-    zombie_objects = [zombies[id] for id in zombie_id]
-
-    entities = human_id + zombie_id
-    sorted_entities = sorted(entities, key=lambda id: (
-        humans.get(id).speed if id in human_id else zombies.get(id).speed
-    ), reverse = True)
+def action (human_objects, zombie_objects):
     
-    sorted_objects = [
-    humans[id] if id in human_id else zombies[id]
-    for id in sorted_entities
-    ]
+    #all functions do all the steps and just return the last result (with all stamina used up)
 
-    in_camp = True if human_location[human_id[1]] in camp.getid() else False
+    objects = human_objects + zombie_objects
+    sorted_objects = sorted(objects, key=lambda obj: obj.speed, reverse=True)
+
+    in_camp = True if human_location[human_objects[1].get_location()] in camp.getid() else False
     add_chance = (len(human_id)-len(zombie_id))*5
 
     for entity in sorted_objects:
@@ -137,12 +128,14 @@ def action (human_id, zombie_id):
                 world.deactivate_human(zh_list[1]) #deactivates human based on id
 
 
-def market (market_list, day_night):
-    humans, zombies = market_list[0], market_list[1]
-    #what happens with x humans and y zombies
-    #end simulation when one side is eliminated
-    li = []# returns lists of lists with stats of each human + store products
-    return li
+def market (human_object, day_night):
+    market = supermarket.getid(human_object[0].position())
+    sorted_objects = sorted(human_object, key=lambda obj: obj.speed, reverse=True)
+    for human in sorted_objects:
+        list = human_market(human, market)
+        human = list[0] #wanna change the global
+        supermarket[market] = list[1] #supermarket with id market
+
 
 def movement (human_list, zombie_list, day_night):
     #same time movement from humans and zombies
