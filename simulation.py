@@ -98,7 +98,7 @@ def start_simulation():
                         human_id.append(id)
                 market_list.append(human_id)
                 seen.append(i)
-        market(market_list)
+        market(market_list, day%1)
 
         #if only humans or zombies
         human_list = []
@@ -111,14 +111,7 @@ def start_simulation():
             if val not in seen:
                 zombie_list.append(id)
 
-        movement(human_list, zombie_list)
-
-        for i in world.humans():
-            i.take_turn(day%1)
-
-        for i in world.zombies():
-            i.take_turn(day%1)
-        
+        movement(human_list, zombie_list, day%1)   
         #floor of float for day number
         #if day%1 == 0 -> day; if day%1 == 0.5 -> night
         day += 0.5
@@ -129,13 +122,13 @@ def action (action_list):
     li = []# returns lists of lists with stats of each character
     return li
 
-def market (market_list):
+def market (market_list, day_night):
     #what happens with x humans and y zombies
     #end simulation when one side is eliminated
     li = []# returns lists of lists with stats of each human + store products
     return li
 
-def movement (human_list, zombie_list):
+def movement (human_list, zombie_list, day_night):
     #same time movement from humans and zombies
     #independent unless they detect each other
     li = []# returns lists of lists with stats and positions of each human/zombie
