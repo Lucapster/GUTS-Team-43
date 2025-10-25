@@ -8,18 +8,6 @@ screen = pygame.display.set_mode((640, 640))
 x = 0
 y = 0
 
-# load grass background wallpaper
-# background = pygame.image.load("Image/grass.png").convert()
-# background = pygame.transform.scale(background, (640, 640))
-
-
-# load minecraft zombie image
-# zombie_pixel = pygame.image.load('Image/zombie-pixel.png').convert_alpha()
-# zombie_pixel = pygame.transform.scale(zombie_pixel, (50, 64))
-
-# load human steve image
-human_pixel = pygame.image.load("Image/human.png").convert_alpha()
-human_pixel = pygame.transform.scale(human_pixel, (50, 50))
 
 class pixel_image: 
     def __init__(self, image_path, size, x, y):
@@ -28,7 +16,7 @@ class pixel_image:
         self.x = x
         self.y = y
 
-    def draw(self, screen):
+    def draw(self, screen = screen):
         screen.blit(self.image, (self.x, self.y))
 
     def move(self, dx, dy):
@@ -37,6 +25,10 @@ class pixel_image:
 
 background = pixel_image("Image/grass.png", (640, 640), 0, 0)
 zombie = pixel_image("Image/zombie-pixel.png", (50, 64), x ,y)
+human = pixel_image("Image/human.png", (50, 50),x, y)
+apartment = pixel_image("Image/apartment.png", (130, 130), 100, 100)
+shop = pixel_image("Image/shop.png", (100, 100), 100, 400)
+
 
 
 running = True
@@ -45,16 +37,17 @@ running = True
 while running:
 
     screen.fill((0, 0, 0))
-    background.draw(screen)
-    zombie.draw(screen)
-    zombie.move(0.05, 0.05)
-
+    background.draw()
+    apartment.draw()
+    shop.draw()
     
 
-    # screen.blit(background, (0, 0)) # load the background
+    zombie.draw()
+    human.draw()
+    
 
-    # screen.blit(zombie_pixel, (x, y)) 
-    screen.blit(human_pixel, (x + 100, y + 100))
+    human.move(0.1, 0.1)
+    zombie.move(0.05, 0.05)
 
     x += 0.05
     y += 0.05
