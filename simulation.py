@@ -302,6 +302,14 @@ def market (human_objects, market_location, day_night):
     for human in sorted_humans:
         human_market(human, supermarket_obj)
 
+def human_market(human, supermarket):
+    food_needed = human.hunger
+
+    food_taken = min(food_needed, supermarket.food_available)
+ 
+    human.hunger -= food_taken
+
+    supermarket.food_available -= food_taken
 
 def movement(human_lone_objects, zombie_lone_objects, day_night):
     for human in human_lone_objects:
