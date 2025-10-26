@@ -29,3 +29,6 @@ shop = pixel_image("Image/shop.png", (100, 100), 100, 400)
 concrete_background = pixel_image("Image/concrete.png", (1920, 1080), 0, 0)
 
 human_poster = pixel_image("Image/human.png", (200, 200),10, 150)
+zombie_poster = pixel_image("Image/zombie-pixel.png", (200, 200), 10, 150)
+
+loading_background = pixel_image("Image/loading_background.png", (1920, 1080), 0, 0)
