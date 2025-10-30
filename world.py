@@ -1,155 +1,13 @@
 import numpy as np
 import random as rand
 import matplotlib.pyplot as plt
+import scipy as sci
 from matplotlib.animation import FuncAnimation
 import math 
+from human_behavior import Human
+from zombie_behavior import Zombie
+from entity_structure import GridEntity
 
-
-class GridEntity:
-    def __init__(self, world_object):
-        self.world_object = world_object
-        self.x_coordinate, self.y_coordinate = world_object.generate_random_coordinate()
-
-    def get_coordinates(self):
-        return [self.x_coordinate, self.y_coordinate]
-
-class MovingEntity(GridEntity):
-    def __init__(self, hp, stamina, speed, hunger, awareness_radius, world_object):
-        super().__init__(world_object)
-        self.hp = hp
-        self.stamina = stamina
-        self.speed = speed
-        self.hunger = hunger
-        self.awareness_radius = awareness_radius
-        self.world_object = world_object
-
-    def get_awareness(self):
-        return self.awareness
-
-    def get_hp(self):
-        return self.hp
-
-    def get_stamina(self):
-        return self.stamina
-
-    def get_speed(self):
-        return self.speed
-
-    def get_hunger(self):
-        return self.hunger
-
-    def get_shortest_path(self, point_a, coordinate_list):
-        pythag_list = []
-        x_a = point[0]
-        y_a = point[1]
-        for coordinates in coordinate_list:
-            x_b = coordinate_list[0]
-            y_b = coordinate_list[1]
-            c = sqrt(abs(x_a-x_b)**2 + abs(y_a-y_b)**2)
-            pythag_list.append(c)
-        shortest_path = min(pythag_list)
-        i = pythag_list.index(shortest_path)
-        
-        return coordinate_list[i]
-
-    def get_vector_angle(self, point_a, point_b):
-        x_a = point_a[0]
-        y_a = point_a[1]
-        x_b = point_b[0]
-        y_b = point_b[1]
-        dx = x_b - x_a
-        dy = y_b - y_a
-
-        angle_rad = math.atan2(dy, dx)
-        angle_deg = math.degrees(angle_rad)
-
-        angle = round((angle_deg + 360) % 360, 1)
-        return angle
-
-    def calculate_compass_move(self, point_a, point_b):
-        angle = self.get_vector_angle()
-        if 337.5 <= angle < 360 or 0 <= angle < 22.5:
-            return "E"
-        elif 22.5 <= angle < 67.5:
-            return "NE"
-        elif 67.5 <= angle < 112.5:
-            return "N"
-        elif 112.5 <= angle < 157.5:
-            return "NW"
-        elif 157.5 <= angle < 202.5:
-            return "W"
-        elif 202.5 <= angle < 247.5:
-            return "SW"
-        elif 247.5 <= angle < 292.5:
-            return "S"
-        elif 292.5 <= angle < 337.5:
-            return "SE" 
-
-
-    def within_radius(self, point_a, point_b, radius):
-        x_a, y_a = point_a[0], point_a[1]
-        x_b, y_b = point_b[0], point_b[1]
-        pythag = sqrt(abs(x_a-x_b)**2 + abs(y_a-y_b)**2)
-        if pythag  <= radius:
-            return True
-
-    def take_damage(self, value):
-        self.hp -= value
-
-    def hunger_damage(self):
-        if self.hunger  <= 0:
-            self.hp -= 10
-
-    def move_entity(self, compass_direction):
-        if compass_direction == "N":
-            self.move_north()
-        elif compass_direction == "S":
-            self.move_south()
-        elif compass_direction == "W":
-            self.move_west()
-        elif compass_direction == "E":
-            self.move_east()
-        elif compass_direction == "NW":
-            self.move_northwest()
-        elif compass_direction == "NE":
-            self.move_northeast()
-        elif compass_direction == "SW":
-            self.move_southwest()
-        elif compass_direction == "SE":
-            self.move_southeast()
-
-    def move_north(self):
-        self.y_coordinate += self.speed
-
-    def move_south(self):
-        self.y_coordinate -= self.speed
-
-    def move_west(self):
-        self.x_coordinate += self.speed
-
-    def move_east(self):
-        self.x_coordinate -= self.speed
-
-    def move_northeast(self):
-        self.move_north()
-        self.move_east()
-
-    def move_northwest(self):
-        self.move_north()
-        self.move_east()
-
-    def move_southeast(self):
-        self.move_south()
-        self.move_east()
-
-    def move_southwest(self):
-        self.move_south()
-        self.move_east()
-
-        
-    def update_entity_coordinate(self, new_x_coordinate, new_y_coordinate):
-        self.x_coordinate = new_x_coordinate
-        self.y_coordinate = new_y_coordinate
 
 class WorldGrid:
     def __init__(self, x_dimension, y_dimension):
@@ -165,101 +23,145 @@ class WorldGrid:
         self.zombies = []
         self.human_camps = []
         self.supermarkets = []
-        self.fig, self.axes = plt.subplots()
-        self.axes.plot([], [], 'k.', markersize=2) #start with empty plot
+        self.is_night = False
 
+        self.fig, self.axes = plt.subplots()
+        self.axes.set_xlim(0, self.x_dimension)
+        self.axes.set_ylim(0, self.y_dimension)
+        self.axes.set_title("Zombie Apocalypse Simulation")
+
+        self.human_scatter = self.axes.plot([], [], 'bo', label="Humans")[0]
+        self.zombie_scatter = self.axes.plot([], [], 'go', label="Zombies")[0]
+
+        self.supermarket_scatter = None
+        self.camp_scatter = None
+        self.legend = None #need to initalize it as none and create legend in draw_static_background()
 
     def generate_random_coordinate(self):
         x = rand.randint(0, self.x_dimension)
-        y = rand.randint(0,self.y_dimension)
-        return x,y
+        y = rand.randint(0, self.y_dimension)
+        return x, y
 
     def get_all_camp_coordinates(self):
-        camp_coordinates = []
-        for camp in self.human_camps:
-           coordinates = camp.get_coordinates() 
-           camp_coordinates.append(coordinates)
-        return camp_coordinates
-
+        return [camp.get_coordinates() for camp in self.human_camps]
 
     def get_all_supermarket_coordinates(self):
-        supermarket_coordinates = []
-        for supermarket in self.supermarkets:
-           coordinates = supermarket.get_coordinates() 
-           supermarket_coordinates.append(coordinates)
-        return supermarket_coordinates
+        return [supermarket.get_coordinates() for supermarket in self.supermarkets]
+
+    def get_all_human_coordinates(self):
+        if not self.humans:
+            return None, []
+        coords = [h.get_coordinates() for h in self.humans]
+        return sci.spatial.cKDTree(coords), coords
+
+    def get_all_zombie_coordinates(self):
+        if not self.zombies:
+            return None, []
+        coords = [z.get_coordinates() for z in self.zombies]
+        return sci.spatial.cKDTree(coords), coords
 
     def add_human(self, hp, stamina, speed, hunger, awareness_radius):
-        human = Human(hp, stamina, speed, hunger, awareness_radius, self) 
+        human = Human(hp, stamina, speed, hunger, awareness_radius, self)
         self.humans.append(human)
-        self.add_human_to_plot(human.x_coordinate, human.y_coordinate)
         return human
-
 
     def add_zombie(self, hp, stamina, speed, hunger, awareness_radius, infection_probability):
         zombie = Zombie(hp, stamina, speed, hunger, awareness_radius, infection_probability, self)
         self.zombies.append(zombie)
-        self.add_zombie_to_plot(zombie.x_coordinate, zombie.y_coordinate)
         return zombie
 
     def add_supermarket(self, food_available):
         supermarket = Supermarket(food_available, self)
-        self.add_supermarket_to_plot(supermarket.x_coordinate, supermarket.y_coordinate)
+        self.supermarkets.append(supermarket)
         return supermarket
 
     def add_human_camp(self, capacity):
-        human_camp = HumanCamp(capacity, self)
-        self.human_camps.append(human_camp)
-        self.add_human_camp_to_plot(human_camp.x_coordinate, human_camp.y_coordinate)
-        return human_camp
+        camp = HumanCamp(capacity, self)
+        self.human_camps.append(camp)
+        return camp
 
-    def decrease_supermarket_food(self, supermarket_object, human_object):
-        food_taken = human_object.get_gluttony_rate()
-        supermarket_object.food_available -= food_taken
-   
-    def add_human_to_plot(self, x, y):
-        self.axes.plot(x, y, c='blue')
+    def delete_zombie(self, zombie_object):
+        if zombie_object in self.zombies:
+            self.zombies.remove(zombie_object)
+            del zombie_object
 
-    def add_zombie_to_plot(self, x, y):
-        self.axes.plot(x, y, c='green')
+    def delete_human(self, human_object):
+        if human_object in self.humans:
+            self.humans.remove(human_object)
+            del human_object
 
-    def add_supermarket_to_plot(self, x, y):
-        self.axes.plot(x, y, 'ro')
-        self.fig.canvas.draw()
+    
+    def draw_static_background(self):
+        handles = [self.human_scatter, self.zombie_scatter]
+        labels = ["Humans", "Zombies"]
 
-    def add_human_camp_to_plot(self, x, y):
-        self.axes.plot(x, y, c='purple')
+        if self.supermarkets:
+            xs, ys = zip(*[s.get_coordinates() for s in self.supermarkets])
+            self.supermarket_scatter = self.axes.plot(xs, ys, 'rs', markersize=6)[0]
+            handles.append(self.supermarket_scatter)
+            labels.append("Supermarkets")
 
-    def update_plot(self, frame = None):
-        pass
-        #self.axes.clear()  # clearing the axes
-        
-    def show_plot(self): # Creates an xy plot for testing purposes
-        anim = FuncAnimation(self.fig, self.update_plot, interval=1000) #may not be needed when Yang finishes his script
-        plt.show()  
+        if self.human_camps:
+            xs, ys = zip(*[c.get_coordinates() for c in self.human_camps])
+            self.camp_scatter = self.axes.plot(xs, ys, 'p', color='purple', markersize=8)[0]
+            handles.append(self.camp_scatter)
+            labels.append("Camps")
+
+        if self.legend is None:
+            self.legend = self.axes.legend(handles, labels, loc="upper right", framealpha=0.9)
+
+
+
+    
+    def update(self, frame):
+        for h in list(self.humans):
+            h.update_behavior()
+        for z in list(self.zombies):
+            z.update_behavior()
+
+        if self.humans:
+            hx, hy = zip(*[h.get_coordinates() for h in self.humans])
+            self.human_scatter.set_data(hx, hy)
+        else:
+            self.human_scatter.set_data([], [])
+
+        if self.zombies:
+            zx, zy = zip(*[z.get_coordinates() for z in self.zombies])
+            self.zombie_scatter.set_data(zx, zy)
+        else:
+            self.zombie_scatter.set_data([], [])
+
+        return [self.human_scatter, self.zombie_scatter]
+
+
+    def show_plot(self):
+        self.draw_static_background()
+
+        anim = FuncAnimation(
+            self.fig,
+            self.update,
+            interval=200,
+            blit=False,
+            repeat=False
+        )
+        plt.show()
+
 
 class Supermarket(GridEntity):
     def __init__(self, food_available, world_object):
         super().__init__(world_object)
         self.food_available = food_available
-        self.world_object = world_object
 
     def get_food_available(self):
         return self.food_available
 
-class HumanCamp:
+
+class HumanCamp(GridEntity):
     def __init__(self, capacity, world_object):
         super().__init__(world_object)
         self.capacity = capacity
         self.humans = []
-        self.population = len(self.humans)
-        self.world_object = world_object
-        
-    def get_capacity(self):
-        return self.capacity
-
-    def get_population(self):
-        return self.population
+        self.population = 0
 
     def add_human_to_camp(self, human_object):
         if self.population >= self.capacity:
@@ -267,9 +169,30 @@ class HumanCamp:
         else:
             self.population += 1
             self.humans.append(human_object)
-        
-myworld = WorldGrid(20,20)
-#print(f"X-GRID:{myworld.x_grid}, Y-GRID:{myworld.y_grid}")
-for i in range(10):
-    myworld.add_supermarket(i)
+
+
+
+myworld = WorldGrid(20, 20)
+
+# add entities
+for _ in range(10):
+    myworld.add_human(100, 100, 1, 100, 10)
+for _ in range(10):
+    myworld.add_zombie(100, 100, 1, 100, 10, 0.5)
+for _ in range(2):
+    myworld.add_supermarket(50)
+for _ in range(2):
+    myworld.add_human_camp(10)
+
+h = Human(100, 100, 1, 100, 10, myworld)
+print("Before move:", h.get_coordinates())
+h.move("N")
+h.move("N")
+h.move("N")
+h.move("N")
+print("After move:", h.get_coordinates())
+# run
 myworld.show_plot()
+
+
+
